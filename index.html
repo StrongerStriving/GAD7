@@ -3,303 +3,222 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Theo dõi điểm người chơi</title>
+    <title>GAD-7 Test</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            margin: 0;
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #f5a623;
+            --background-color: #f0f4f8;
+            --text-color: #333;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2, h3 {
+            color: var(--primary-color);
+        }
+        input[type="text"], input[type="date"] {
+            width: 100%;
             padding: 10px;
-            box-sizing: border-box;
-            max-width: 100%;
-            overflow-x: hidden;
+            margin: 5px 0 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
         }
-        .container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-        }
-        h1 { 
-            font-size: 1.8em; 
-            text-align: center;
-        }
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-            max-width: 250px;
-            margin-top: 20px;
-        }
-        .input-group input, .input-group button {
-            font-size: 0.9em;
-            padding: 8px;
-            margin-bottom: 8px;
-        }
-        table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            margin-bottom: 20px; 
-            font-size: 1.2em;
-        }
-        th, td { 
-            border: 1px solid #ddd; 
-            padding: 15px; 
-            text-align: left; 
-        }
-        .player-name {
-            font-size: 1.4em;
-            font-weight: bold;
-            padding: 8px 15px;
-            border-radius: 5px;
+        button {
+            background-color: var(--primary-color);
             color: white;
-            display: inline-block;
-            margin-bottom: 5px;
-        }
-        .player-score {
-            font-size: 1.4em;
-            font-weight: bold;
-            margin-right: 10px;
-        }
-        .score-button {
-            font-size: 1.3em;
-            padding: 8px 15px;
-            margin: 0 5px;
             border: none;
-            border-radius: 5px;
+            padding: 10px 20px;
+            margin: 10px 10px 10px 0;
+            border-radius: 4px;
             cursor: pointer;
-            background-color: #f0f0f0;
+            transition: background-color 0.3s;
         }
-        .edit-delete-button {
-            font-size: 1em;
-            padding: 5px 8px;
-            margin: 0 2px;
-            border: none;
-            background: none;
-            cursor: pointer;
+        button:hover {
+            background-color: #357abd;
         }
-        .action-buttons {
-            margin-top: 10px;
-        }
-        button { 
-            margin: 5px; 
-            padding: 10px; 
-            font-size: 1em;
-            touch-action: manipulation;
-            cursor: pointer;
-        }
-        .chart-container {
-            position: relative;
-            height: 50vh;
-            width: 100%;
+        .legend {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
             margin-bottom: 20px;
         }
-        .modal {
+        .question {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .options {
+            display: flex;
+            justify-content: flex-start;
+            margin-top: 10px;
+        }
+        .option {
+            margin-right: 10px;
+        }
+        .option input[type="radio"] {
             display: none;
-            position: fixed;
-            z-index: 1;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.4);
         }
-        .modal-content {
-            background-color: #fefefe;
-            margin: 15% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-            max-width: 500px;
-        }
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
+        .option label {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            text-align: center;
+            line-height: 30px;
+            border: 2px solid var(--primary-color);
+            border-radius: 50%;
+            color: var(--primary-color);
             cursor: pointer;
+            transition: all 0.3s;
         }
-        @media (max-width: 600px) {
-            table { font-size: 1em; }
-            .player-name { font-size: 1.2em; }
-            .player-score { font-size: 1.2em; }
-            .score-button { font-size: 1.1em; }
-            .edit-delete-button { font-size: 0.9em; }
+        .option input[type="radio"]:checked + label {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        #results {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        #chart {
+            margin-top: 20px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Theo dõi điểm người chơi</h1>
-        
-        <table id="scoreTable">
-            <tr>
-                <th>Tên người chơi</th>
-                <th>Điểm số</th>
-                <th>Hành động</th>
-            </tr>
-        </table>
-
-        <div>
-            <button onclick="endWeek()">Kết thúc tuần</button>
-            <button onclick="exportData()">Xuất dữ liệu</button>
-            <input type="file" id="importFile" style="display: none;" onchange="importData(event)">
-            <button onclick="document.getElementById('importFile').click()">Nhập dữ liệu</button>
-        </div>
-
-        <div class="chart-container">
-            <canvas id="scoreChart"></canvas>
-        </div>
-
-        <div class="input-group">
-            <input type="text" id="playerName" placeholder="Tên người chơi">
-            <input type="number" id="score" placeholder="Điểm số">
-            <button onclick="addScore()">Thêm/Cập nhật điểm</button>
-        </div>
+    <h1>GAD-7 Test (Phiên bản tiếng Việt)</h1>
+    
+    <div>
+        <label for="name">Họ tên:</label>
+        <input type="text" id="name" placeholder="Nhập họ tên của bạn">
+    </div>
+    <div>
+        <label for="pid">PID:</label>
+        <input type="text" id="pid" placeholder="Nhập PID của bạn">
+    </div>
+    <div>
+        <label for="date">Ngày làm test:</label>
+        <input type="date" id="date">
     </div>
 
-    <div id="editModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <h2>Chỉnh sửa người chơi</h2>
-            <input type="text" id="editPlayerName" placeholder="Tên mới">
-            <button onclick="saveEdit()">Lưu</button>
-        </div>
+    <h2>Bảng câu hỏi GAD-7</h2>
+    
+    <div class="legend">
+        <h3>Trong 2 tuần vừa qua, bạn có thường xuyên bị làm phiền bởi những vấn đề sau đây không?</h3>
+        <p><strong>0</strong> - Không có</p>
+        <p><strong>1</strong> - Có một vài ngày</p>
+        <p><strong>2</strong> - Có hơn một nửa số ngày</p>
+        <p><strong>3</strong> - Gần như mỗi ngày</p>
     </div>
+
+    <div id="questions"></div>
+
+    <button onclick="calculateScore()">Tính điểm</button>
+    <button onclick="clearData()" style="background-color: #e74c3c;">Xóa dữ liệu</button>
+
+    <div id="results"></div>
+    <canvas id="chart"></canvas>
 
     <script>
-        let players = {};
-        let weeklyScores = [];
-        let chart;
-        const colors = [
-            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40',
-            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'
+        const questions = [
+            "Cảm thấy lo lắng, bồn chồn hoặc căng thẳng",
+            "Không thể ngừng hoặc kiểm soát được sự lo lắng",
+            "Lo lắng quá nhiều về những việc khác nhau",
+            "Khó thư giãn",
+            "Bồn chồn đến mức khó có thể ngồi yên",
+            "Dễ bị khó chịu hoặc cáu gắt",
+            "Cảm thấy sợ hãi như thể điều gì đó tồi tệ có thể xảy ra"
         ];
-        let colorIndex = 0;
-        let editingPlayer = '';
 
-        window.onload = function() {
-            loadData();
-            updateTable();
-            updateChart();
-        };
+        let chart;
 
-        function addScore() {
-            const name = document.getElementById('playerName').value;
-            const score = parseInt(document.getElementById('score').value);
-            
-            if (name && !isNaN(score)) {
-                if (!players[name]) {
-                    players[name] = {
-                        score: score,
-                        color: colors[colorIndex % colors.length]
-                    };
-                    colorIndex++;
-                } else {
-                    players[name].score += score;
-                }
-                updateTable();
-                saveData();
-            }
-        }
-
-        function updateTable() {
-            const table = document.getElementById('scoreTable');
-            table.innerHTML = `
-                <tr>
-                    <th>Tên người chơi</th>
-                    <th>Điểm số</th>
-                    <th>Hành động</th>
-                </tr>
-            `;
-            
-            for (let name in players) {
-                const row = table.insertRow(-1);
-                const nameCell = row.insertCell(0);
-                nameCell.innerHTML = `<span class="player-name" style="background-color: ${players[name].color};">${name}</span>`;
-                const scoreCell = row.insertCell(1);
-                scoreCell.innerHTML = `<span class="player-score">${players[name].score}</span>`;
-                const actionCell = row.insertCell(2);
-                actionCell.innerHTML = `
-                    <div>
-                        <button class="score-button" onclick="adjustScore('${name}', 1)">+1</button>
-                        <button class="score-button" onclick="adjustScore('${name}', -1)">-1</button>
-                    </div>
-                    <div class="action-buttons">
-                        <button class="edit-delete-button" onclick="editPlayer('${name}')">✎</button>
-                        <button class="edit-delete-button" onclick="deletePlayer('${name}')">🗑️</button>
+        function initQuestions() {
+            const questionsDiv = document.getElementById('questions');
+            questions.forEach((q, index) => {
+                questionsDiv.innerHTML += `
+                    <div class="question">
+                        <p><strong>${index + 1}.</strong> ${q}</p>
+                        <div class="options">
+                            ${[0, 1, 2, 3].map(value => `
+                                <div class="option">
+                                    <input type="radio" id="q${index}_${value}" name="q${index}" value="${value}">
+                                    <label for="q${index}_${value}">${value}</label>
+                                </div>
+                            `).join('')}
+                        </div>
                     </div>
                 `;
+            });
+        }
+
+        function calculateScore() {
+            let totalScore = 0;
+            for (let i = 0; i < 7; i++) {
+                const selectedOption = document.querySelector(`input[name="q${i}"]:checked`);
+                if (selectedOption) {
+                    totalScore += parseInt(selectedOption.value);
+                }
             }
-        }
 
-        function adjustScore(name, amount) {
-            players[name].score += amount;
-            updateTable();
-            saveData();
-        }
+            const results = {
+                date: document.getElementById('date').value,
+                name: document.getElementById('name').value,
+                pid: document.getElementById('pid').value,
+                score: totalScore
+            };
 
-        function editPlayer(name) {
-            editingPlayer = name;
-            document.getElementById('editPlayerName').value = name;
-            document.getElementById('editModal').style.display = 'block';
-        }
-
-        function saveEdit() {
-            const newName = document.getElementById('editPlayerName').value;
-            if (newName && newName !== editingPlayer) {
-                players[newName] = players[editingPlayer];
-                delete players[editingPlayer];
-                weeklyScores.forEach(week => {
-                    if (week[editingPlayer] !== undefined) {
-                        week[newName] = week[editingPlayer];
-                        delete week[editingPlayer];
-                    }
-                });
-                updateTable();
-                updateChart();
-                saveData();
-            }
-            closeModal();
-        }
-
-        function deletePlayer(name) {
-            if (confirm(`Bạn có chắc chắn muốn xóa người chơi "${name}"?`)) {
-                delete players[name];
-                weeklyScores.forEach(week => {
-                    delete week[name];
-                });
-                updateTable();
-                updateChart();
-                saveData();
-            }
-        }
-
-        function closeModal() {
-            document.getElementById('editModal').style.display = 'none';
-        }
-
-        function endWeek() {
-            const weekScores = {};
-            for (let name in players) {
-                weekScores[name] = players[name].score;
-            }
-            weeklyScores.push(weekScores);
+            displayResults(results);
+            saveResults(results);
             updateChart();
-            saveData();
+        }
+
+        function displayResults(results) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = `
+                <h3>Kết quả:</h3>
+                <p><strong>Tổng điểm GAD-7:</strong> ${results.score} - ${getAnxietySeverity(results.score)}</p>
+                <p>${getRecommendation(results.score)}</p>
+            `;
+        }
+
+        function getAnxietySeverity(score) {
+            if (score >= 0 && score <= 4) return "Lo âu tối thiểu";
+            if (score >= 5 && score <= 9) return "Lo âu nhẹ";
+            if (score >= 10 && score <= 14) return "Lo âu vừa";
+            if (score >= 15) return "Lo âu nặng";
+        }
+
+        function getRecommendation(score) {
+            if (score >= 0 && score <= 4) return "Không cần can thiệp.";
+            if (score >= 5 && score <= 9) return "Theo dõi, tái đánh giá sau.";
+            if (score >= 10) return "Cần can thiệp tích cực. Nên tham khảo ý kiến bác sĩ chuyên khoa.";
+        }
+
+        function saveResults(results) {
+            let savedResults = JSON.parse(localStorage.getItem('gad7Results')) || [];
+            savedResults.push(results);
+            localStorage.setItem('gad7Results', JSON.stringify(savedResults));
         }
 
         function updateChart() {
-            const ctx = document.getElementById('scoreChart').getContext('2d');
-            const labels = weeklyScores.map((_, index) => `Tuần ${index + 1}`);
-            const datasets = Object.keys(players).map(name => ({
-                label: name,
-                data: weeklyScores.map(week => week[name] || 0),
-                fill: false,
-                borderColor: players[name].color,
-                backgroundColor: players[name].color
-            }));
+            const savedResults = JSON.parse(localStorage.getItem('gad7Results')) || [];
+            const ctx = document.getElementById('chart').getContext('2d');
 
             if (chart) {
                 chart.destroy();
@@ -308,91 +227,48 @@
             chart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: labels,
-                    datasets: datasets
+                    labels: savedResults.map(r => r.date),
+                    datasets: [{
+                        label: 'Điểm GAD-7',
+                        data: savedResults.map(r => r.score),
+                        borderColor: '#4a90e2',
+                        fill: false
+                    }]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Điểm số theo tuần'
-                        },
-                        legend: {
-                            position: 'bottom'
-                        }
+                    title: {
+                        display: true,
+                        text: 'Điểm GAD-7 theo thời gian',
+                        fontSize: 18,
+                        fontColor: '#333'
                     },
                     scales: {
-                        x: {
+                        yAxes: [{
                             ticks: {
-                                maxRotation: 0,
-                                minRotation: 0
+                                beginAtZero: true,
+                                max: 21
                             }
-                        }
+                        }]
                     }
                 }
             });
         }
 
-        function saveData() {
-            localStorage.setItem('players', JSON.stringify(players));
-            localStorage.setItem('weeklyScores', JSON.stringify(weeklyScores));
-            localStorage.setItem('colorIndex', colorIndex);
-        }
-
-        function loadData() {
-            const savedPlayers = localStorage.getItem('players');
-            const savedWeeklyScores = localStorage.getItem('weeklyScores');
-            const savedColorIndex = localStorage.getItem('colorIndex');
-
-            if (savedPlayers) {
-                players = JSON.parse(savedPlayers);
-            }
-            if (savedWeeklyScores) {
-                weeklyScores = JSON.parse(savedWeeklyScores);
-            }
-            if (savedColorIndex) {
-                colorIndex = parseInt(savedColorIndex);
+        function clearData() {
+            localStorage.removeItem('gad7Results');
+            document.getElementById('results').innerHTML = '';
+            document.getElementById('name').value = '';
+            document.getElementById('pid').value = '';
+            document.getElementById('date').value = '';
+            document.querySelectorAll('input[type="radio"]').forEach(radio => radio.checked = false);
+            if (chart) {
+                chart.destroy();
             }
         }
 
-        function exportData() {
-            const data = {
-                players: players,
-                weeklyScores: weeklyScores,
-                colorIndex: colorIndex
-            };
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
-            const downloadAnchorNode = document.createElement('a');
-            downloadAnchorNode.setAttribute("href", dataStr);
-            downloadAnchorNode.setAttribute("download", "player_scores.json");
-            document.body.appendChild(downloadAnchorNode);
-            downloadAnchorNode.click();
-            downloadAnchorNode.remove();
-        }
-
-        function importData(event) {
-            const file = event.target.files[0];
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const data = JSON.parse(e.target.result);
-                players = data.players;
-                weeklyScores = data.weeklyScores;
-                colorIndex = data.colorIndex;
-                saveData();
-                updateTable();
-                updateChart();
-            };
-            reader.readAsText(file);
-        }
-
-        // Close modal when clicking outside of it
-        window.onclick = function(event) {
-            if (event.target == document.getElementById('editModal')) {
-                closeModal();
-            }
-        }
+        initQuestions();
+        updateChart();
     </script>
 </body>
 </html>
